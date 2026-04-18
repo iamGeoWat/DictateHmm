@@ -1,6 +1,4 @@
-# CLAUDE.md — 给接手的你
-
-你接手了一个正在开发中的项目。先读完这份文档，再开始做事。
+# CLAUDE.md — 项目接手文档
 
 ---
 
@@ -8,25 +6,11 @@
 
 **DictateHmm**：一个中文哼哼输入法。用户闭嘴哼（只传声调+节奏，没有声母韵母），结合上下文，产生候选中文。MVP 阶段，验证可行性。
 
-## 用户是谁、怎么合作
-
-观察到的风格（按该顺序对待）：
-
-1. **先讨论，再执行。** 用户经常问"还有哪些路？"、"这样对吗？"、"先调研再写文档再执行"。**除非用户说"执行"/"做"/"写代码"，否则默认先给方案、权衡、选型供选择**。
-2. **技术讨论要结构化。** 用户明确抱怨过"讨论不清晰"。答复涉及多选项时，**列表格**（方案 / 精度 / 延迟 / 依赖 / 许可证），每行一句话。避免散文。
-3. **把"懒路径"和"主路径"分开。** 云端 LLM 直出 = 懒路径，纯链路 = 主路径。用户倾向主路径，但保留懒路径做 fallback/对比。**不要偷偷用 LLM 绕过问题。**
-4. **中文主，技术名词英文。** 回复中文，API/库/论文名保留英文。
-5. **用户会剪范围。** 主动提出"跳过 X"、"压成 2 阶段" 这类剪枝；你应该也主动做同样判断，但**向用户确认后再改计划文档**。
-6. **简短回复。** 工具调用之间一两句；最终回复不超过一段。用户不需要过程解说，需要结论 + 去向。
-7. **用户信任你的判断，但会抽查结论。** 遇到不对的会直说（例："这些技术路线讨论的不是很清晰"）。别粉饰，别虚张，承认不确定。
-8. **提交粒度要对。** 文档一个 commit，代码一个 commit，决策变更一个 commit。消息写"why"不写"what"。
-9. **不主动 push/PR/comment GitHub**，除非用户明说。本项目分支是 `claude/humming-input-method-vU28Z`，MVP 已推送过。
-
 ## 当前状态
 
 **阶段：** MVP 已实现并推送。用户正在/即将本地试用。**等用户试用反馈**再决定下一步迭代方向。
 
-**重要：** 不要自动启动下一阶段工作。用户说"试完了，下一步做 X" 再动。
+不要自动启动下一阶段工作。用户说"试完了，下一步做 X" 再动。
 
 ## 代码和文档快速导航
 
@@ -66,7 +50,7 @@ DictateHmm/
     └── build_tone_index.py    # jieba dict + pypinyin → tone-index.json
 ```
 
-## 流水线（必背）
+## 流水线
 
 ```
 mic → AudioWorklet(16k) → pitchy F0 → segment → tone classify → rhythm → beam candidates
@@ -86,7 +70,7 @@ mic → AudioWorklet(16k) → pitchy F0 → segment → tone classify → rhythm
 | 纯词频排序，不上 KenLM / LLM | MVP 阶段先跑通，先看基线差多少 |
 | 声调索引来自 jieba dict.txt | 公开、免费、349K 词；MIN_FREQ=3，TOP_PER_SEQ=1500 |
 | 手加了 BOOST_PHRASES | jieba 是新闻/web 语料，口语高频词（谢谢、再见、晚安）被低估 |
-| 跳过 Phase 0（LLM 可行性验证） | LLM 成功 ≠ 我们主链路成功；不预测我们的结果，浪费时间 |
+| 跳过 Phase 0（LLM 可行性验证） | LLM 成功 ≠ 主链路成功；不预测结果，浪费时间 |
 | 旁路多模态 LLM 只留文档不实现 | 不是主路，文档保留作为产品化 fallback 备选 |
 
 ## 成功/失败标准（`docs/overview.md`）
@@ -108,7 +92,7 @@ npm run dev                           # http://localhost:5173
 npm run build                         # 类型检查 + 生产构建
 ```
 
-**注：** `tone-index.json` 已在仓库内（7 MB）。重跑 `build_tone_index.py` 只在改索引逻辑或调参时需要。
+`tone-index.json` 已在仓库内（7 MB）。重跑 `build_tone_index.py` 只在改索引逻辑或调参时需要。
 
 ## 预期的坑
 
@@ -118,13 +102,13 @@ npm run build                         # 类型检查 + 生产构建
 - **`npm install` 需要网络**；tone-index.json 已在仓库内，不需要 Python 也能跑前端（只要索引文件存在）。
 - **tsconfig 严格**，`npm run build` 会跑 `tsc -b`；别塞 `any`。
 
-## 下一步按 ROI 的优先级（来自用户和我的共识）
+## 下一步按 ROI 的优先级
 
 只有用户确认主动迭代时才动：
 
 1. **上下文 + LLM rerank**（最大杠杆）。把候选 Top-20 + 上下文扔给 Claude/Gemini 选，主要收益来源。
 2. **候选排序加 n-gram LM**（KenLM WASM 或本地 trigram JSON）。纯词频太弱。
-3. **加入声调 Top-2 探索**的节奏惩罚 / 奖励调参。
+3. **声调 Top-2 探索**的节奏惩罚 / 奖励调参。
 4. **声调分类换 CNN**。需要自录数据，~数百条。
 5. **Streaming / 边哼边出候选**（架构改动大，等前面都做完）。
 6. **实现旁路多模态 LLM**（对比用、或作为 fallback）。
@@ -133,12 +117,12 @@ npm run build                         # 类型检查 + 生产构建
 
 ## 工作流约定
 
-- **改代码前**：读对应 stage 的文档，确认你在和哪条升级路径对齐。
+- **改代码前**：读对应 stage 的文档，确认在和哪条升级路径对齐。
 - **改决策前**：先和用户对齐，然后改 `docs/mvp-plan.md` 或对应文档，再动代码。
 - **提交**：文档一个 commit，代码一个 commit。Commit 消息写 "why"。
 - **推送**：分支 `claude/humming-input-method-vU28Z`，`git push -u origin <branch>`。
 - **不要** 自动创建 PR、不主动 force push、不提交 node_modules / dist。
-- **评测集**：还没有。如果用户让你做评测，先建 `eval/datasets/` 放自录音频 + 标注 JSON。
+- **评测集**：还没有。如果用户让做评测，先建 `eval/datasets/` 放自录音频 + 标注 JSON。
 
 ## 分支和 Git 状态
 
@@ -147,12 +131,3 @@ npm run build                         # 类型检查 + 生产构建
   1. `feat(mvp): runnable humming input method end-to-end`
   2. `docs(mvp-plan): drop LLM feasibility phase, compress to 2 stages`
   3. `docs: initial research and MVP plan for humming input method`
-
-## 最后一点
-
-用户是**产品/工程双栖**，对技术本质有直觉但不会自己写代码。你要：
-- 把技术选择的**权衡**讲清楚，让他能做决策
-- 主动提**可能错的地方**和**你不确定的地方**
-- 别为了显得能干而堆工作量——**裁掉无用环节比做满更受欣赏**
-
-祝接手顺利。
