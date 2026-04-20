@@ -1,0 +1,271 @@
+[
+  {
+    "id": "p001",
+    "text": "啊",
+    "pinyin": "a5",
+    "toneSeq": [
+      5
+    ],
+    "source": "script"
+  },
+  {
+    "id": "p002",
+    "text": "鱼",
+    "pinyin": "yu2",
+    "toneSeq": [
+      2
+    ],
+    "source": "script"
+  },
+  {
+    "id": "p003",
+    "text": "好",
+    "pinyin": "hao3",
+    "toneSeq": [
+      3
+    ],
+    "source": "script"
+  },
+  {
+    "id": "p004",
+    "text": "是",
+    "pinyin": "shi4",
+    "toneSeq": [
+      4
+    ],
+    "source": "script"
+  },
+  {
+    "id": "p005",
+    "text": "的",
+    "pinyin": "de5",
+    "toneSeq": [
+      5
+    ],
+    "source": "script"
+  },
+  {
+    "id": "p006",
+    "text": "你好",
+    "pinyin": "ni3 hao3",
+    "toneSeq": [
+      3,
+      3
+    ],
+    "source": "script"
+  },
+  {
+    "id": "p007",
+    "text": "谢谢",
+    "pinyin": "xie4 xie4",
+    "toneSeq": [
+      4,
+      4
+    ],
+    "source": "script"
+  },
+  {
+    "id": "p008",
+    "text": "晚安",
+    "pinyin": "wan3 an1",
+    "toneSeq": [
+      3,
+      1
+    ],
+    "source": "script"
+  },
+  {
+    "id": "p009",
+    "text": "再见",
+    "pinyin": "zai4 jian4",
+    "toneSeq": [
+      4,
+      4
+    ],
+    "source": "script"
+  },
+  {
+    "id": "p010",
+    "text": "加油",
+    "pinyin": "jia1 you2",
+    "toneSeq": [
+      1,
+      2
+    ],
+    "source": "script"
+  },
+  {
+    "id": "p011",
+    "text": "没事",
+    "pinyin": "mei2 shi4",
+    "toneSeq": [
+      2,
+      4
+    ],
+    "source": "script"
+  },
+  {
+    "id": "p012",
+    "text": "对不起",
+    "pinyin": "dui4 bu4 qi3",
+    "toneSeq": [
+      4,
+      4,
+      3
+    ],
+    "source": "script"
+  },
+  {
+    "id": "p013",
+    "text": "不客气",
+    "pinyin": "bu2 ke4 qi4",
+    "toneSeq": [
+      2,
+      4,
+      4
+    ],
+    "source": "script"
+  },
+  {
+    "id": "p014",
+    "text": "吃了吗",
+    "pinyin": "chi1 le5 ma5",
+    "toneSeq": [
+      1,
+      5,
+      5
+    ],
+    "source": "script"
+  },
+  {
+    "id": "p015",
+    "text": "怎么了",
+    "pinyin": "zen3 me5 le5",
+    "toneSeq": [
+      3,
+      5,
+      5
+    ],
+    "source": "script"
+  },
+  {
+    "id": "p016",
+    "text": "晚上好",
+    "pinyin": "wan3 shang4 hao3",
+    "toneSeq": [
+      3,
+      4,
+      3
+    ],
+    "source": "script"
+  },
+  {
+    "id": "p017",
+    "text": "我爱你",
+    "pinyin": "wo3 ai4 ni3",
+    "toneSeq": [
+      3,
+      4,
+      3
+    ],
+    "source": "script"
+  },
+  {
+    "id": "p018",
+    "text": "没关系",
+    "pinyin": "mei2 guan1 xi4",
+    "toneSeq": [
+      2,
+      1,
+      4
+    ],
+    "source": "script"
+  },
+  {
+    "id": "p019",
+    "text": "辛苦了啊",
+    "pinyin": "xin1 ku3 le5 a5",
+    "toneSeq": [
+      1,
+      3,
+      5,
+      5
+    ],
+    "source": "script"
+  },
+  {
+    "id": "p020",
+    "text": "有空吗哥",
+    "pinyin": "you3 kong4 ma5 ge1",
+    "toneSeq": [
+      3,
+      4,
+      5,
+      1
+    ],
+    "source": "script"
+  },
+  {
+    "id": "p021",
+    "text": "明天见啊",
+    "pinyin": "ming2 tian1 jian4 a5",
+    "toneSeq": [
+      2,
+      1,
+      4,
+      5
+    ],
+    "source": "script"
+  },
+  {
+    "id": "p022",
+    "text": "你在干嘛",
+    "pinyin": "ni3 zai4 gan4 ma2",
+    "toneSeq": [
+      3,
+      4,
+      4,
+      2
+    ],
+    "source": "script"
+  },
+  {
+    "id": "p023",
+    "text": "今天好累啊",
+    "pinyin": "jin1 tian1 hao3 lei4 a5",
+    "toneSeq": [
+      1,
+      1,
+      3,
+      4,
+      5
+    ],
+    "source": "script"
+  },
+  {
+    "id": "p024",
+    "text": "晚上吃什么",
+    "pinyin": "wan3 shang4 chi1 shen2 me5",
+    "toneSeq": [
+      3,
+      4,
+      1,
+      2,
+      5
+    ],
+    "source": "script"
+  },
+  {
+    "id": "p025",
+    "text": "我想你了啊",
+    "pinyin": "wo3 xiang3 ni3 le5 a5",
+    "toneSeq": [
+      3,
+      3,
+      3,
+      5,
+      5
+    ],
+    "source": "script"
+  }
+]

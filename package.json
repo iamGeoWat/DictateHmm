@@ -10,7 +10,7 @@
     "preview": "vite preview",
     "test": "vitest run",
     "test:watch": "vitest",
-    "build:phrases": "python3 scripts/build_phrases.py"
+    "build:phrases": "eval/.venv/bin/python scripts/build_phrases.py"
   },
   "dependencies": {
     "pitchy": "^4.1.0",

@@ -12,6 +12,10 @@ dist
 dist-ssr
 *.local
 
+# eval harness
+eval/.venv/
+eval/results/*.json
+
 # Editor directories and files
 .vscode/*
 !.vscode/extensions.json
