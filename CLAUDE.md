@@ -120,9 +120,10 @@ npm run build                         # 类型检查 + 生产构建
 - **改代码前**：读对应 stage 的文档，确认在和哪条升级路径对齐。
 - **改决策前**：先和用户对齐，然后改 `docs/mvp-plan.md` 或对应文档，再动代码。
 - **提交**：文档一个 commit，代码一个 commit。Commit 消息写 "why"。
-- **推送**：分支 `claude/humming-input-method-vU28Z`，`git push -u origin <branch>`。
-- **不要** 自动创建 PR、不主动 force push、不提交 node_modules / dist。
-- **评测集**：还没有。如果用户让做评测，先建 `eval/datasets/` 放自录音频 + 标注 JSON。
+- **推送**：分支 `claude/humming-input-method-vU28Z`，`git push origin <branch>`。每次有意义的 commit 完成后自己推，不用问。远端是 SSH (`git@github.com:iamGeoWat/DictateHmm.git`)。
+- **PR**：要不要建 PR 自己判断。在 `claude/humming-input-method-vU28Z` 分支上开子分支做大改动再 PR 合回来是 OK 的路径，但没有硬要求；直推主分支也可以。
+- **不主动 force push**、**不提交 node_modules / dist**。
+- **评测集**：工具在 `eval/`（见 `eval/README.md`）。录音走 `/eval/record`（Chrome/Edge），指标走 `/eval/run`。目前还没有正式的第一批数据。
 
 ## 分支和 Git 状态
 
