@@ -8,9 +8,15 @@
 
 ## 当前状态
 
-**阶段：** MVP 已实现并推送。用户正在/即将本地试用。**等用户试用反馈**再决定下一步迭代方向。
+**阶段：** MVP 链路全跑通 + 评测工具链 (eval harness) 已交付。**阻塞在"还没采第一批真实数据"**。
 
-不要自动启动下一阶段工作。用户说"试完了，下一步做 X" 再动。
+- ✅ 流水线 7 环全部打通（`src/{audio,pitch,segment,tone,rhythm,candidates}`）。
+- ✅ 分段从绝对阈值 (-45 dBFS) 换成自适应相对阈值，**响度无关**。Safari 小声录音也能正常分段。
+- ✅ 评测工具链：`/eval/record` 录音（带实时电平表）、`/eval/run` 批量评测、
+  `eval/datasets/phrases.txt` 25 条草案脚本、`src/eval/metrics.ts` 指标口径。
+- 🔲 **下一步是采第一批 20–30 条哼哼**（由用户在 Chrome 或 Safari 里录）→ 跑 `/eval/run` 拿基线数字 → 根据基线决定第一个大改点。
+
+不要自动启动下一阶段工作。用户录完一批并跑过 eval 之后，再一起看数据决定改什么。
 
 ## 代码和文档快速导航
 
@@ -35,19 +41,40 @@ DictateHmm/
 ├── src/
 │   ├── audio/capture.ts       # getUserMedia + AudioWorklet
 │   ├── pitch/extract.ts       # pitchy MPM + 中值滤波 + octave 修正
-│   ├── segment/segment.ts     # 能量 + F0 voicing 分段
+│   ├── segment/segment.ts     # 自适应阈值分段（+ segment.test.ts）
 │   ├── tone/classify.ts       # 规则分类器（log z-score 后 slope/curvature/fMinPos）
 │   ├── rhythm/features.ts
 │   ├── candidates/match.ts    # beam search over tone × split
 │   ├── pipeline.ts            # 编排
 │   ├── types.ts               # 环节间接口
-│   ├── App.tsx / App.css      # UI
-│   └── ui/PitchPlot.tsx
+│   ├── App.tsx / App.css      # UI（主输入法页）
+│   ├── main.tsx               # BrowserRouter 挂 / 和 /eval/*
+│   ├── ui/PitchPlot.tsx
+│   └── eval/                  # ★ 评测工具
+│       ├── wav.ts             # Float32 → 16-bit PCM WAV（+ test）
+│       ├── metrics.ts         # Top-K / 混淆矩阵 / 按字数拆 / 延迟（+ test）
+│       ├── api.ts             # /__eval/* 端点客户端
+│       ├── types.ts
+│       └── pages/{EvalIndex,EvalRecord,EvalRun}.tsx
 ├── public/
 │   ├── audio-worklet.js       # AudioWorklet processor（必须独立文件）
 │   └── data/tone-index.json   # 构建产物，7 MB，已在仓库
-└── scripts/
-    └── build_tone_index.py    # jieba dict + pypinyin → tone-index.json
+├── scripts/
+│   ├── build_tone_index.py    # jieba dict + pypinyin → tone-index.json
+│   ├── build_phrases.py       # phrases.txt + pypinyin → phrases.json
+│   └── vite-plugin-eval-io.ts # dev-only 写盘端点（/__eval/save-wav 等）
+├── eval/                      # ★ 评测数据 + 结果
+│   ├── README.md
+│   ├── datasets/
+│   │   ├── phrases.txt        # 脚本，人维护
+│   │   ├── phrases.json       # 编译产物（commit）
+│   │   ├── labels.json        # 录制时追加
+│   │   └── recordings/*.wav   # 录音（commit）
+│   ├── results/*.json         # 每次 run 的指标（.gitignore）
+│   └── .venv/                 # pypinyin venv（.gitignore）
+└── docs/superpowers/
+    ├── specs/2026-04-19-eval-harness-design.md
+    └── plans/2026-04-19-eval-harness.md
 ```
 
 ## 流水线
@@ -98,13 +125,24 @@ npm run build                         # 类型检查 + 生产构建
 
 - **AudioWorklet 必须独立文件**，不能 bundle — 在 `public/audio-worklet.js`。改它别移走。
 - **浏览器 AudioContext 采样率不是 16 kHz**（通常 44.1/48）。`resampleTo16k` 在 `src/audio/capture.ts`，F0 前必须重采样。
-- **Safari 没测过**，已知 AudioWorklet 有坑。Chrome/Edge 桌面优先。
+- **Safari 支持**：capture + eval pipeline 在 Safari 测过（2026-04-21），录音电平
+  偏低（RMS ~-66 dBFS）但自适应分段阈值之后能正常工作。AGC 在 Safari 上似乎
+  没真正启用，用户实际录音声音要放到麦近一些。Chrome/Edge 仍是主要测试平台。
+- **`/__eval/*` 端点只在 `npm run dev` 下有**（Vite 插件 `apply: 'serve'`）。
+  production build 里没有这些路径，`/eval/record` `/eval/run` 会看着能打开但
+  API 会全部 404。
+- **pypinyin 在 eval/.venv 里**，不在系统 Python（Homebrew PEP 668）。
+  `npm run build:phrases` 自动用 venv 里的 python。
 - **`npm install` 需要网络**；tone-index.json 已在仓库内，不需要 Python 也能跑前端（只要索引文件存在）。
 - **tsconfig 严格**，`npm run build` 会跑 `tsc -b`；别塞 `any`。
 
 ## 下一步按 ROI 的优先级
 
-只有用户确认主动迭代时才动：
+**0. 先采第一批数据 + 拿基线**（当前阻塞项）。用户去 `/eval/record` 录 20–30 条
+   phrases.txt 里的短语，然后 `/eval/run` 看 Top-5 / 声调混淆 / 按字数拆的数。
+   基线出来之前，下面 1–6 项**不知道谁是瓶颈**，所有选型都是凭感觉。
+
+跑完基线之后，按以下 ROI 排序挑最大瓶颈动手（用户确认再动）：
 
 1. **上下文 + LLM rerank**（最大杠杆）。把候选 Top-20 + 上下文扔给 Claude/Gemini 选，主要收益来源。
 2. **候选排序加 n-gram LM**（KenLM WASM 或本地 trigram JSON）。纯词频太弱。
@@ -113,7 +151,8 @@ npm run build                         # 类型检查 + 生产构建
 5. **Streaming / 边哼边出候选**（架构改动大，等前面都做完）。
 6. **实现旁路多模态 LLM**（对比用、或作为 fallback）。
 
-每一步都应先读对应 `docs/stages/*.md` 里的"升级路径"，再动。
+每一步都应先读对应 `docs/stages/*.md` 里的"升级路径"，再动。每次改完跑一次
+`/eval/run` 对比上次 results JSON，别凭感觉说"这次改好了"。
 
 ## 工作流约定
 
@@ -128,7 +167,8 @@ npm run build                         # 类型检查 + 生产构建
 ## 分支和 Git 状态
 
 - 主开发分支：`claude/humming-input-method-vU28Z`
-- 最近 3 次 commit：
-  1. `feat(mvp): runnable humming input method end-to-end`
-  2. `docs(mvp-plan): drop LLM feasibility phase, compress to 2 stages`
-  3. `docs: initial research and MVP plan for humming input method`
+- 远端：SSH `git@github.com:iamGeoWat/DictateHmm.git`
+- 最近几次 commit（顶为最新）：
+  1. `fix(segment): adaptive silence threshold + live level meter on record page`
+  2. `docs(CLAUDE.md): relax push/PR autonomy, update eval pointer`
+  3. eval harness 9 个 task commits（`feat(eval): ...`）+ spec + plan
