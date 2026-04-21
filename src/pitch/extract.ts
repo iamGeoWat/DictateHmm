@@ -14,7 +14,10 @@ export function extractF0(samples: Float32Array, sampleRate: number): PitchFrame
     throw new Error(`extractF0 expects 16 kHz input, got ${sampleRate}`);
   }
   const detector = PitchDetector.forFloat32Array(FRAME_SIZE);
-  detector.minVolumeDecibels = -60;
+  // Keep this low so quiet recordings (e.g. Safari without effective AGC)
+  // still yield F0 frames. Bogus pitch on noise is filtered by MIN_CLARITY
+  // and by segmentation's adaptive silence threshold.
+  detector.minVolumeDecibels = -70;
 
   const out: PitchFrame[] = [];
   const frame = new Float32Array(FRAME_SIZE);
@@ -31,7 +34,7 @@ export function extractF0(samples: Float32Array, sampleRate: number): PitchFrame
     const [hz, clarity] = detector.findPitch(frame, sampleRate);
 
     let f0: number | null = null;
-    if (hz >= MIN_F0 && hz <= MAX_F0 && clarity >= MIN_CLARITY && rmsDb > -55) {
+    if (hz >= MIN_F0 && hz <= MAX_F0 && clarity >= MIN_CLARITY && rmsDb > -65) {
       f0 = hz;
     }
 

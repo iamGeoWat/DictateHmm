@@ -20,6 +20,8 @@ export function EvalRecord() {
   const [note, setNote] = useState('');
   const [rec, setRec] = useState<RecState>({ kind: 'idle' });
   const [error, setError] = useState<string | null>(null);
+  const [liveRms, setLiveRms] = useState(-60);
+  const [peakDb, setPeakDb] = useState(-60);
   const autoStopRef = useRef<number | null>(null);
   const recRef = useRef<RecState>(rec);
   recRef.current = rec;
@@ -76,8 +78,15 @@ export function EvalRecord() {
 
   const start = useCallback(async () => {
     setError(null);
+    setLiveRms(-60);
+    setPeakDb(-60);
     try {
       const session = await startCapture();
+      session.onFrame((f) => {
+        const db = 20 * Math.log10(Math.max(f.rms, 1e-6));
+        setLiveRms(db);
+        setPeakDb((cur) => (db > cur ? db : cur));
+      });
       setRec({ kind: 'recording', session });
       autoStopRef.current = window.setTimeout(() => { void stop(); }, MAX_RECORD_MS);
     } catch (e) {
@@ -182,11 +191,27 @@ export function EvalRecord() {
                 <button className="mic" onClick={start}>🎤 录</button>
               )}
               {rec.kind === 'recording' && (
-                <button className="mic mic-on" onClick={stop}>⏹ 停（自动 5s）</button>
+                <div style={{ display: 'flex', flexDirection: 'column', gap: 8, maxWidth: 420 }}>
+                  <button className="mic mic-on" onClick={stop}>⏹ 停（自动 5s）</button>
+                  <div className="meter" style={{ margin: 0, width: '100%' }}>
+                    <div
+                      className="meter-fill"
+                      style={{ width: `${Math.max(0, Math.min(100, (liveRms + 60) * 1.67))}%` }}
+                    />
+                  </div>
+                  <div style={{ fontFamily: 'monospace', fontSize: 12, opacity: 0.7 }}>
+                    当前 {liveRms.toFixed(0)} dB · 峰值 {peakDb.toFixed(0)} dB
+                    {peakDb < -45 && <span style={{ color: '#ff9a66', marginLeft: 8 }}>（偏低，离麦克风近点或声音大些）</span>}
+                  </div>
+                </div>
               )}
               {rec.kind === 'reviewing' && (
                 <div style={{ display: 'flex', flexDirection: 'column', gap: 12, maxWidth: 420 }}>
                   <audio src={rec.url} controls />
+                  <div style={{ fontFamily: 'monospace', fontSize: 12, opacity: 0.7 }}>
+                    峰值 {peakDb.toFixed(0)} dB
+                    {peakDb < -45 && <span style={{ color: '#ff9a66', marginLeft: 8 }}>（偏低，建议重录）</span>}
+                  </div>
                   <input
                     placeholder="note（可选，例如 quiet / keyboard / tired）"
                     value={note}
